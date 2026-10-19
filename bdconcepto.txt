@@ -1,0 +1,21 @@
+Dueños guarda a los propietarios de las mascotas: id, dni (único), nombre, teléfono y email.
+
+Especies recoge los tipos de animal con su peso mínimo y máximo. Se usa para el ComboBox al dar de alta una mascota.
+
+Mascotas contiene nombre, raza, fecha de nacimiento, peso, si está esterilizada y su foto. Se relaciona uno a varios con Dueños (un dueño tiene varias mascotas) y con Especies.
+
+Veterinarios guarda el número de colegiado (único), nombre, especialidad y si sigue activo.
+
+Vacunas almacena el nombre de cada vacuna y cada cuántos días hay que repetirla.
+
+Mascota_Vacuna es la tabla intermedia de la relación varios a varios entre Mascotas y Vacunas. Además de las dos claves, tiene atributos propios: fecha de aplicación, lote y el veterinario que la puso.
+
+Consultas registra cada visita: fecha, motivo, peso actual, mascota y veterinario.
+
+Medicamentos guarda el nombre, la concentración en mg y el rango de dosis mínima y máxima en mg/kg.
+
+Consulta_Medicamento es la segunda relación varios a varios, y funciona como la receta. Indica qué medicamentos se pautan en cada consulta, con la dosis en mg/kg, las tomas al día y los días de tratamiento. Es lo que se envía a la App 2.
+
+Informes guarda la respuesta de la App 2 para cada consulta: id de solicitud (único), fecha de procesamiento y estado.
+
+Resultados tiene una fila por medicamento del informe, con la dosis total calculada, las unidades por toma y la clasificación (correcta, por debajo o por encima del rango).
