@@ -1,4 +1,4 @@
-Dueños guarda a los propietarios de las mascotas: id, dni (único), nombre, teléfono y email.
+Dueños guarda a los propietarios de las mascotas: id, dni (único), nombre, teléfono y email (único).
 
 Especies recoge los tipos de animal con su peso mínimo y máximo. Se usa para el ComboBox al dar de alta una mascota.
 

@@ -22,8 +22,8 @@ CREATE TABLE duenos (
     dni         CHAR(9)      NOT NULL UNIQUE,
     nombre      VARCHAR(100) NOT NULL,
     telefono    CHAR(9)      NOT NULL,
-    email       VARCHAR(100)
-) ENGINE = InnoDB;
+    email       VARCHAR(100) UNIQUE
+);
 
 
 -- -------------------------------------------------------------
@@ -34,7 +34,7 @@ CREATE TABLE especies (
     nombre      VARCHAR(50)  NOT NULL UNIQUE,
     peso_min    DECIMAL(5,2) NOT NULL,
     peso_max    DECIMAL(5,2) NOT NULL
-) ENGINE = InnoDB;
+);
 
 
 -- -------------------------------------------------------------
@@ -56,7 +56,7 @@ CREATE TABLE mascotas (
         ON DELETE CASCADE  ON UPDATE CASCADE,
     FOREIGN KEY (id_especie) REFERENCES especies(id)
         ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB;
+);
 
 
 -- -------------------------------------------------------------
@@ -68,7 +68,7 @@ CREATE TABLE veterinarios (
     nombre          VARCHAR(100) NOT NULL,
     especialidad    VARCHAR(50),
     activo          BOOLEAN      NOT NULL DEFAULT TRUE
-) ENGINE = InnoDB;
+);
 
 
 -- -------------------------------------------------------------
@@ -78,7 +78,7 @@ CREATE TABLE vacunas (
     id                  INT          AUTO_INCREMENT PRIMARY KEY,
     nombre              VARCHAR(50)  NOT NULL UNIQUE,
     periodicidad_dias   INT          NOT NULL
-) ENGINE = InnoDB;
+);
 
 
 -- -------------------------------------------------------------
@@ -100,7 +100,7 @@ CREATE TABLE mascota_vacuna (
         ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
         ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE = InnoDB;
+);
 
 
 -- -------------------------------------------------------------
@@ -117,7 +117,7 @@ CREATE TABLE consultas (
         ON DELETE CASCADE  ON UPDATE CASCADE,
     FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
         ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE = InnoDB;
+);
 
 
 -- -------------------------------------------------------------
@@ -131,7 +131,7 @@ CREATE TABLE medicamentos (
     concentracion_mg    DECIMAL(8,2) NOT NULL,
     dosis_min           DECIMAL(6,2) NOT NULL,
     dosis_max           DECIMAL(6,2) NOT NULL
-) ENGINE = InnoDB;
+);
 
 
 -- -------------------------------------------------------------
@@ -149,7 +149,7 @@ CREATE TABLE consulta_medicamento (
         ON DELETE CASCADE  ON UPDATE CASCADE,
     FOREIGN KEY (id_medicamento) REFERENCES medicamentos(id)
         ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB;
+);
 
 
 -- -------------------------------------------------------------
@@ -163,7 +163,7 @@ CREATE TABLE informes (
     id_consulta             INT          NOT NULL,
     FOREIGN KEY (id_consulta) REFERENCES consultas(id)
         ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB;
+);
 
 
 -- -------------------------------------------------------------
@@ -182,4 +182,4 @@ CREATE TABLE resultados (
         ON DELETE CASCADE  ON UPDATE CASCADE,
     FOREIGN KEY (id_medicamento) REFERENCES medicamentos(id)
         ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB;
+);
