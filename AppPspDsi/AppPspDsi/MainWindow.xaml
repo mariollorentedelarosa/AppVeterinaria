@@ -1,0 +1,162 @@
+﻿<Window x:Class="AppPspDsi.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AppPspDsi"
+        mc:Ignorable="d"
+        Title="Clínica Veterinaria" Height="600" Width="900">
+    <Grid>
+
+        <TabControl Margin="10">
+
+            
+            <TabItem Header="Conexión">
+                <GroupBox Header="Conexión a la base de datos" Width="300"
+                          HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10">
+                    <StackPanel Margin="10">
+                        <Label Content="Servidor:"/>
+                        <TextBox x:Name="txtServidor" Text="localhost"/>
+
+                        <Label Content="Usuario:"/>
+                        <TextBox x:Name="txtUsuario" Text="root"/>
+
+                        <Label Content="Contraseña:"/>
+                        <PasswordBox x:Name="pwdContrasena"/>
+
+                        <Button x:Name="btnConectar" Content="Conectar" Margin="0,15,0,5" Click="btnConectar_Click"/>
+                        <Label x:Name="lblEstadoConexion" Content="Sin conectar"/>
+                    </StackPanel>
+                </GroupBox>
+            </TabItem>
+
+            
+            <TabItem Header="Dueños">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    
+                    <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1"
+                            Padding="10" Margin="0,0,10,0">
+                        <StackPanel>
+                            <Label Content="DNI:"/>
+                            <TextBox x:Name="txtDni"/>
+
+                            <Label Content="Nombre:"/>
+                            <TextBox x:Name="txtNombre"/>
+
+                            <Label Content="Teléfono:"/>
+                            <TextBox x:Name="txtTelefono"/>
+
+                            <Label Content="Email:"/>
+                            <TextBox x:Name="txtEmail"/>
+
+                            <Button x:Name="btnInsertarDueno" Content="Insertar" Margin="0,15,0,5"/>
+                            <Button x:Name="btnModificarDueno" Content="Modificar" Margin="0,0,0,5"/>
+                            <Button x:Name="btnEliminarDueno" Content="Eliminar" Margin="0,0,0,5"/>
+                            <Button x:Name="btnLimpiarDueno" Content="Limpiar"/>
+                        </StackPanel>
+                    </Border>
+
+                    
+                    <DataGrid x:Name="dgDuenos" Grid.Column="1" IsReadOnly="True"/>
+                </Grid>
+            </TabItem>
+
+            
+            <TabItem Header="Mascotas">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    
+                    <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1"
+                            Padding="10" Margin="0,0,10,0">
+                        <StackPanel>
+                            <Label Content="Nombre:"/>
+                            <TextBox x:Name="txtNombreMascota"/>
+
+                            <Label Content="Especie:"/>
+                            <ComboBox x:Name="cmbEspecie" DisplayMemberPath="Nombre" SelectedValuePath="Id"/>
+
+                            <Label Content="Dueño:"/>
+                            <ComboBox x:Name="cmbDueno" DisplayMemberPath="Nombre" SelectedValuePath="Id"/>
+
+                            <Label Content="Fecha de nacimiento:"/>
+                            <DatePicker x:Name="dpFechaNacimiento"/>
+
+                            <Label Content="Peso (kg):"/>
+                            <TextBox x:Name="txtPeso"/>
+
+                            <CheckBox x:Name="chkEsterilizada" Content="Esterilizada" Margin="0,10,0,0"/>
+
+                            <Button x:Name="btnInsertarMascota" Content="Insertar" Margin="0,15,0,5"/>
+                            <Button x:Name="btnModificarMascota" Content="Modificar" Margin="0,0,0,5"/>
+                            <Button x:Name="btnEliminarMascota" Content="Eliminar"/>
+                        </StackPanel>
+                    </Border>
+
+                    
+                    <DockPanel Grid.Column="1">
+                        <GroupBox DockPanel.Dock="Bottom" Header="Vacunas de la mascota seleccionada"
+                                  Height="130" Margin="0,10,0,0">
+                            <ListBox x:Name="lstVacunas"/>
+                        </GroupBox>
+
+                        <DataGrid x:Name="dgMascotas" IsReadOnly="True"/>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+
+            
+            <TabItem Header="Enviar a App 2">
+                <DockPanel Margin="10">
+
+                    
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Label Content="Consulta:"/>
+                        <ComboBox x:Name="cmbConsulta" Width="300"/>
+                        <Button x:Name="btnEnviar" Content="Enviar" Width="100" Margin="10,0,0,0"/>
+                    </StackPanel>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <GroupBox Grid.Column="0" Header="JSON enviado" Margin="0,0,5,0">
+                                <TextBox x:Name="txtJsonEnviado" IsReadOnly="True" TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto"/>
+                            </GroupBox>
+
+                            <GroupBox Grid.Column="1" Header="JSON recibido" Margin="5,0,0,0">
+                                <TextBox x:Name="txtJsonRecibido" IsReadOnly="True" TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto"/>
+                            </GroupBox>
+                        </Grid>
+
+                        
+                        <GroupBox Grid.Row="1" Header="Resultados" Margin="0,10,0,0">
+                            <DataGrid x:Name="dgResultados" IsReadOnly="True"/>
+                        </GroupBox>
+                    </Grid>
+                </DockPanel>
+            </TabItem>
+
+        </TabControl>
+
+    </Grid>
+</Window>
