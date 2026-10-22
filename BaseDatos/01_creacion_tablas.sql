@@ -1,22 +1,14 @@
--- =============================================================
--- Clínica veterinaria - Creación de la base de datos (MySQL)
--- Las validaciones de los datos (pesos, dosis, DNI...) se hacen
--- en la aplicación, no en la base de datos.
--- =============================================================
+-- Creación de la base de datos de la clínica veterinaria
+-- Las validaciones (DNI, pesos, dosis...) las hacemos en la app, no en la BD
 
--- Se borra y se vuelve a crear entera para poder ejecutar
--- el script varias veces desde cero
+-- Si ya existe la borramos para poder ejecutar el script otra vez
 DROP DATABASE IF EXISTS clinica_veterinaria;
-CREATE DATABASE clinica_veterinaria
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_spanish_ci;
+CREATE DATABASE clinica_veterinaria;
 
 USE clinica_veterinaria;
 
 
--- -------------------------------------------------------------
--- DUEÑOS
--- -------------------------------------------------------------
+-- Dueños
 CREATE TABLE duenos (
     id          INT          AUTO_INCREMENT PRIMARY KEY,
     dni         CHAR(9)      NOT NULL UNIQUE,
@@ -26,9 +18,7 @@ CREATE TABLE duenos (
 );
 
 
--- -------------------------------------------------------------
--- ESPECIES (se usa en el ComboBox al dar de alta una mascota)
--- -------------------------------------------------------------
+-- Especies, con el peso mínimo y máximo de cada una
 CREATE TABLE especies (
     id          INT          AUTO_INCREMENT PRIMARY KEY,
     nombre      VARCHAR(50)  NOT NULL UNIQUE,
@@ -37,11 +27,9 @@ CREATE TABLE especies (
 );
 
 
--- -------------------------------------------------------------
--- MASCOTAS
--- 1:N con duenos   -> si se borra el dueño se borran sus mascotas
--- 1:N con especies -> no se deja borrar una especie que esté en uso
--- -------------------------------------------------------------
+-- Mascotas. Cada mascota es de un dueño y de una especie (1:N)
+-- Si borramos un dueño se borran sus mascotas, pero no se puede
+-- borrar una especie si hay mascotas de esa especie
 CREATE TABLE mascotas (
     id                  INT          AUTO_INCREMENT PRIMARY KEY,
     nombre              VARCHAR(50)  NOT NULL,
@@ -49,7 +37,6 @@ CREATE TABLE mascotas (
     fecha_nacimiento    DATE         NOT NULL,
     peso                DECIMAL(5,2) NOT NULL,
     esterilizada        BOOLEAN      NOT NULL DEFAULT FALSE,
-    foto                VARCHAR(255),                    -- ruta de la imagen
     id_dueno            INT          NOT NULL,
     id_especie          INT          NOT NULL,
     FOREIGN KEY (id_dueno)   REFERENCES duenos(id)
@@ -59,72 +46,8 @@ CREATE TABLE mascotas (
 );
 
 
--- -------------------------------------------------------------
--- VETERINARIOS
--- -------------------------------------------------------------
-CREATE TABLE veterinarios (
-    id              INT          AUTO_INCREMENT PRIMARY KEY,
-    num_colegiado   VARCHAR(10)  NOT NULL UNIQUE,
-    nombre          VARCHAR(100) NOT NULL,
-    especialidad    VARCHAR(50),
-    activo          BOOLEAN      NOT NULL DEFAULT TRUE
-);
-
-
--- -------------------------------------------------------------
--- VACUNAS
--- -------------------------------------------------------------
-CREATE TABLE vacunas (
-    id                  INT          AUTO_INCREMENT PRIMARY KEY,
-    nombre              VARCHAR(50)  NOT NULL UNIQUE,
-    periodicidad_dias   INT          NOT NULL
-);
-
-
--- -------------------------------------------------------------
--- MASCOTA_VACUNA (N:M entre mascotas y vacunas)
--- La fecha forma parte de la clave para poder registrar
--- la misma vacuna varias veces (revacunaciones).
--- Si se borra el veterinario, el registro se queda sin él (SET NULL).
--- -------------------------------------------------------------
-CREATE TABLE mascota_vacuna (
-    id_mascota          INT          NOT NULL,
-    id_vacuna           INT          NOT NULL,
-    fecha_aplicacion    DATE         NOT NULL,
-    lote                VARCHAR(20)  NOT NULL,
-    id_veterinario      INT,
-    PRIMARY KEY (id_mascota, id_vacuna, fecha_aplicacion),
-    FOREIGN KEY (id_mascota)     REFERENCES mascotas(id)
-        ON DELETE CASCADE  ON UPDATE CASCADE,
-    FOREIGN KEY (id_vacuna)      REFERENCES vacunas(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
-        ON DELETE SET NULL ON UPDATE CASCADE
-);
-
-
--- -------------------------------------------------------------
--- CONSULTAS
--- -------------------------------------------------------------
-CREATE TABLE consultas (
-    id              INT          AUTO_INCREMENT PRIMARY KEY,
-    fecha           DATETIME     NOT NULL,
-    motivo          VARCHAR(255) NOT NULL,
-    peso_actual     DECIMAL(5,2) NOT NULL,
-    id_mascota      INT          NOT NULL,
-    id_veterinario  INT,
-    FOREIGN KEY (id_mascota)     REFERENCES mascotas(id)
-        ON DELETE CASCADE  ON UPDATE CASCADE,
-    FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
-        ON DELETE SET NULL ON UPDATE CASCADE
-);
-
-
--- -------------------------------------------------------------
--- MEDICAMENTOS
--- concentracion_mg: mg por unidad (comprimido)
--- dosis_min / dosis_max: en mg/kg
--- -------------------------------------------------------------
+-- Medicamentos. La concentración son los mg que tiene cada comprimido
+-- y la dosis mínima y máxima van en mg/kg
 CREATE TABLE medicamentos (
     id                  INT          AUTO_INCREMENT PRIMARY KEY,
     nombre              VARCHAR(100) NOT NULL UNIQUE,
@@ -134,51 +57,28 @@ CREATE TABLE medicamentos (
 );
 
 
--- -------------------------------------------------------------
--- CONSULTA_MEDICAMENTO (N:M entre consultas y medicamentos)
--- Es la receta: lo que se envía a la App 2 para procesar.
--- -------------------------------------------------------------
-CREATE TABLE consulta_medicamento (
-    id_consulta         INT          NOT NULL,
-    id_medicamento      INT          NOT NULL,
-    dosis_mg_kg         DECIMAL(6,2) NOT NULL,
-    tomas_dia           INT          NOT NULL,
-    dias_tratamiento    INT          NOT NULL,
-    PRIMARY KEY (id_consulta, id_medicamento),
-    FOREIGN KEY (id_consulta)    REFERENCES consultas(id)
-        ON DELETE CASCADE  ON UPDATE CASCADE,
-    FOREIGN KEY (id_medicamento) REFERENCES medicamentos(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE
-);
-
-
--- -------------------------------------------------------------
--- INFORMES (respuesta de la App 2 para una consulta)
--- -------------------------------------------------------------
+-- Informes, es la tabla intermedia entre mascotas y medicamentos (N:M)
+-- Cada fila es un medicamento que se le receta a una mascota y es lo
+-- que mandamos a la App 2. Los datos de la respuesta se quedan vacíos
+-- hasta que la App 2 contesta
 CREATE TABLE informes (
-    id                      INT          AUTO_INCREMENT PRIMARY KEY,
-    id_solicitud            VARCHAR(20)  NOT NULL UNIQUE,    -- 'SOL-2026-001'
-    fecha_procesamiento     DATETIME     NOT NULL,
-    estado                  VARCHAR(50)  NOT NULL,
-    id_consulta             INT          NOT NULL,
-    FOREIGN KEY (id_consulta) REFERENCES consultas(id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-
--- -------------------------------------------------------------
--- RESULTADOS (una fila por medicamento del informe)
--- clasificacion: 'Correcta', 'Por debajo' o 'Por encima'
--- -------------------------------------------------------------
-CREATE TABLE resultados (
-    id                  INT           AUTO_INCREMENT PRIMARY KEY,
-    id_informe          INT           NOT NULL,
-    id_medicamento      INT           NOT NULL,
-    dosis_total_mg      DECIMAL(10,2) NOT NULL,
-    unidades_por_toma   DECIMAL(6,2)  NOT NULL,
-    clasificacion       VARCHAR(20)   NOT NULL,
-    UNIQUE (id_informe, id_medicamento),
-    FOREIGN KEY (id_informe)     REFERENCES informes(id)
+    id                      INT           AUTO_INCREMENT PRIMARY KEY,
+    id_mascota              INT           NOT NULL,
+    id_medicamento          INT           NOT NULL,
+    -- datos de la receta
+    fecha_receta            DATE          NOT NULL,
+    motivo                  VARCHAR(255)  NOT NULL,
+    dosis_mg_kg             DECIMAL(6,2)  NOT NULL,
+    tomas_dia               INT           NOT NULL,
+    dias_tratamiento        INT           NOT NULL,
+    -- lo que devuelve la App 2
+    id_solicitud            VARCHAR(20)   UNIQUE,
+    estado                  VARCHAR(50)   NOT NULL DEFAULT 'Pendiente',
+    fecha_procesamiento     DATETIME,
+    dosis_total_mg          DECIMAL(10,2),
+    unidades_por_toma       DECIMAL(6,2),
+    clasificacion           VARCHAR(20),
+    FOREIGN KEY (id_mascota)     REFERENCES mascotas(id)
         ON DELETE CASCADE  ON UPDATE CASCADE,
     FOREIGN KEY (id_medicamento) REFERENCES medicamentos(id)
         ON DELETE RESTRICT ON UPDATE CASCADE
