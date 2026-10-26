@@ -1,0 +1,10 @@
+-Las Named Pipelines son un mecanismo de Windows que permite la comunicación entre dos procesos. Se les identifica con un nombre, como //./pipe/TuberiaVeterinaria.
+Un proceso crea la tubería y espera la petición (servidor), y el otro se conecta a ella (cliente).
+
+-Para usarlas en c# usamos la  namespace System.Io.Pipes de forma que en el servidor creamos NamedPipeServerStream y en el cliente NamedPipeClientStream, como heredan de Stream vamos a utilizar StreamReader y StreamWritter. Como la comunicación va a ser bidireccional, vamos a usar PipeDirection.InOut
+
+-La ventaja de usarlas es que no hace falta abrir puertos, son rápidas porque comparten memoria. Y las desventajas es que hay que tener mucho en cuenta la concurrencia de hilos, usando async y que cada instancia del servidor atiende solo una conexión.
+
+-En nuestro proyecto la App1 va a ser el cliente. Es la que tiene la conexión a la bd y el crud. Es la que decide cuando enviar la petición. La App2 es el servidor, ya que es la que espera la petición, la procesa y la envía de vuelta. Solo va a haber una petición por conexión, de forma que el cliente se conecta, envía en una línea el json y recibe en otra line el json de la respuesta y cierra esta petición. Lo hacemos en una sola línea para saber donde termina y poder cerrar la conexión.
+
+
