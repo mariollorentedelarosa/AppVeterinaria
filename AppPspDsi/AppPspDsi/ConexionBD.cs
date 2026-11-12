@@ -5,6 +5,8 @@ namespace AppPspDsi
     /// <summary>
     /// Guarda los datos de conexión a la base de datos MySQL local (puerto 3306)
     /// y crea las conexiones que usan el resto de pestañas.
+    /// Los métodos son síncronos: es la ventana la que los lanza en otro hilo
+    /// con Task.Run para no congelar la interfaz.
     /// </summary>
     public static class ConexionBD
     {
@@ -20,7 +22,7 @@ namespace AppPspDsi
         /// Monta la cadena de conexión con los datos de la pestaña Conexión
         /// y comprueba que se puede abrir. Si falla lanza la excepción de MySQL.
         /// </summary>
-        public static async Task ConectarAsync(string servidor, string usuario, string contrasena)
+        public static void Conectar(string servidor, string usuario, string contrasena)
         {
             var builder = new MySqlConnectionStringBuilder
             {
@@ -37,7 +39,7 @@ namespace AppPspDsi
             // Abrimos una conexión de prueba para ver que los datos son correctos
             using (var conexion = new MySqlConnection(cadena))
             {
-                await conexion.OpenAsync();
+                conexion.Open();
             }
 
             cadenaConexion = cadena;
@@ -52,13 +54,13 @@ namespace AppPspDsi
         /// Devuelve una conexión nueva ya abierta. Hay que usarla con using
         /// para que se cierre al terminar (el pool de MySQL la reutiliza).
         /// </summary>
-        public static async Task<MySqlConnection> AbrirConexionAsync()
+        public static MySqlConnection AbrirConexion()
         {
             if (cadenaConexion == null)
                 throw new InvalidOperationException("No hay conexión con la base de datos. Conéctate primero en la pestaña Conexión.");
 
             var conexion = new MySqlConnection(cadenaConexion);
-            await conexion.OpenAsync();
+            conexion.Open();
             return conexion;
         }
     }

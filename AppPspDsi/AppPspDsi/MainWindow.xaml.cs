@@ -41,13 +41,19 @@ namespace AppPspDsi
                 return;
             }
 
+            // La contraseña se lee aquí, en el hilo de la ventana, porque desde
+            // otro hilo no se puede acceder a los controles
+            string contrasena = pwdContrasena.Password;
+
             btnConectar.IsEnabled = false;
             lblEstadoConexion.Content = "Conectando...";
 
             try
             {
-                // Se hace con await para que la ventana no se congele mientras conecta
-                await ConexionBD.ConectarAsync(servidor, usuario, pwdContrasena.Password);
+                // Conectar es síncrono, así que lo lanzamos en un hilo del pool con Task.Run
+                // para que la ventana no se congele. Al volver del await seguimos en el hilo
+                // de la ventana y podemos tocar los controles sin usar el Dispatcher.
+                await Task.Run(() => ConexionBD.Conectar(servidor, usuario, contrasena));
                 MostrarEstadoConexion(true, $"Conectado a {ConexionBD.BaseDatos} ({servidor}:{ConexionBD.Puerto})");
             }
             catch (Exception ex)
