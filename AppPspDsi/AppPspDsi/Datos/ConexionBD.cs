@@ -1,13 +1,8 @@
 using MySqlConnector;
 
-namespace AppPspDsi
+namespace AppPspDsi.Datos
 {
-    /// <summary>
-    /// Guarda los datos de conexión a la base de datos MySQL local (puerto 3306)
-    /// y crea las conexiones que usan el resto de pestañas.
-    /// Los métodos son síncronos: es la ventana la que los lanza en otro hilo
-    /// con Task.Run para no congelar la interfaz.
-    /// </summary>
+    // Guarda los datos de conexión a MySQL y crea las conexiones para el resto de la app
     public static class ConexionBD
     {
         public const int Puerto = 3306;
@@ -18,11 +13,9 @@ namespace AppPspDsi
 
         public static bool Conectado => cadenaConexion != null;
 
-        /// <summary>
-        /// Monta la cadena de conexión con los datos de la pestaña Conexión
-        /// y comprueba que se puede abrir. Si falla lanza la excepción de MySQL.
-        /// </summary>
-        public static void Conectar(string servidor, string usuario, string contrasena)
+        // Monta la cadena con los datos de la pestaña Conexión y prueba a abrirla.
+        // Si falla salta la excepción de MySQL
+        public static async Task ConectarAsync(string servidor, string usuario, string contrasena)
         {
             var builder = new MySqlConnectionStringBuilder
             {
@@ -37,9 +30,9 @@ namespace AppPspDsi
             string cadena = builder.ConnectionString;
 
             // Abrimos una conexión de prueba para ver que los datos son correctos
-            using (var conexion = new MySqlConnection(cadena))
+            await using (var conexion = new MySqlConnection(cadena))
             {
-                conexion.Open();
+                await conexion.OpenAsync();
             }
 
             cadenaConexion = cadena;
@@ -50,17 +43,14 @@ namespace AppPspDsi
             cadenaConexion = null;
         }
 
-        /// <summary>
-        /// Devuelve una conexión nueva ya abierta. Hay que usarla con using
-        /// para que se cierre al terminar (el pool de MySQL la reutiliza).
-        /// </summary>
-        public static MySqlConnection AbrirConexion()
+        // Devuelve una conexión ya abierta, hay que usarla con await using para que se cierre
+        public static async Task<MySqlConnection> AbrirConexionAsync()
         {
             if (cadenaConexion == null)
                 throw new InvalidOperationException("No hay conexión con la base de datos. Conéctate primero en la pestaña Conexión.");
 
             var conexion = new MySqlConnection(cadenaConexion);
-            conexion.Open();
+            await conexion.OpenAsync();
             return conexion;
         }
     }

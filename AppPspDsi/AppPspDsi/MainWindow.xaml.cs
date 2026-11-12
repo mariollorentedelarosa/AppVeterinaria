@@ -8,12 +8,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AppPspDsi.Datos;
 
 namespace AppPspDsi
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -41,8 +39,6 @@ namespace AppPspDsi
                 return;
             }
 
-            // La contraseña se lee aquí, en el hilo de la ventana, porque desde
-            // otro hilo no se puede acceder a los controles
             string contrasena = pwdContrasena.Password;
 
             btnConectar.IsEnabled = false;
@@ -50,10 +46,9 @@ namespace AppPspDsi
 
             try
             {
-                // Conectar es síncrono, así que lo lanzamos en un hilo del pool con Task.Run
-                // para que la ventana no se congele. Al volver del await seguimos en el hilo
-                // de la ventana y podemos tocar los controles sin usar el Dispatcher.
-                await Task.Run(() => ConexionBD.Conectar(servidor, usuario, contrasena));
+                // Mientras MySQL contesta la ventana sigue funcionando. Al volver del await
+                // seguimos en el hilo de la ventana y podemos tocar los controles sin Dispatcher
+                await ConexionBD.ConectarAsync(servidor, usuario, contrasena);
                 MostrarEstadoConexion(true, $"Conectado a {ConexionBD.BaseDatos} ({servidor}:{ConexionBD.Puerto})");
             }
             catch (Exception ex)
